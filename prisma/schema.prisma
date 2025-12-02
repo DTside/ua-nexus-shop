@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL") // Теперь ссылка берется из переменных окружения
+}
+
+// --- КОРИСТУВАЧІ ---
+model User {
+  id          String    @id @default(uuid())
+  diiaId      String    @unique
+  fullName    String?
+  phone       String?   @unique
+  trustRating Float     @default(5.0)
+  
+  orders      Order[]
+  createdAt   DateTime  @default(now())
+}
+
+// --- ТОВАРИ ---
+model Product {
+  id          String   @id @default(uuid())
+  title       String
+  price       Int      
+  vendor      String
+  color       String?  
+  
+  // Новые поля (Одежда + Фото)
+  image       String?  
+  stock       Int      @default(100)
+  isUkranian  Boolean  @default(true)
+  description String?  
+  features    String?
+  sizes       String?
+  
+  // Связи
+  orderItems  OrderItem[]
+
+  createdAt   DateTime @default(now())
+}
+
+// --- ЗАМОВЛЕННЯ ---
+model Order {
+  id              String      @id @default(uuid())
+  userId          String?
+  user            User?       @relation(fields: [userId], references: [id])
+  totalAmount     Int
+  donationAmount  Int         @default(0)
+  status          String      @default("PENDING")
+  paymentMethod   String?     @default("UNKNOWN")
+  deliveryCity    String?
+  deliveryCityRef String?
+  deliveryOffice  String?
+  deliveryOfficeRef String?
+  items           OrderItem[]
+  createdAt       DateTime    @default(now())
+}
+
+// --- ДЕТАЛІ ЗАМОВЛЕННЯ ---
+model OrderItem {
+  id        String  @id @default(uuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id])
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  price     Int
+  quantity  Int     @default(1)
+}

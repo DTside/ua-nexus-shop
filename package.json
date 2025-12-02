@@ -1,0 +1,39 @@
+{
+  "name": "ua-nexus",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "npx prisma generate && npx prisma migrate deploy && next build",
+    "start": "next start",
+    "lint": "next lint",
+    "postinstall": "prisma generate"
+  },
+  "prisma": {
+    "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
+  },
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "framer-motion": "^12.23.25",
+    "lucide-react": "^0.555.0",
+    "next": "16.0.6",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "react-hot-toast": "^2.6.0",
+    "tailwind-merge": "^3.4.0"
+  },
+  "devDependencies": {
+    "@prisma/client": "^5.10.2",
+    "@types/node": "^20.19.25",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "autoprefixer": "^10.4.22",
+    "eslint": "^9",
+    "eslint-config-next": "16.0.6",
+    "postcss": "^8.5.6",
+    "prisma": "^5.10.2",
+    "tailwindcss": "^3.4.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
+}
