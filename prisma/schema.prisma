@@ -10,8 +10,8 @@ datasource db {
 // --- КОРИСТУВАЧІ ---
 model User {
   id          String    @id @default(uuid())
-  email       String    @unique // НОВОЕ ПОЛЕ (Логин)
-  password    String            // НОВОЕ ПОЛЕ (Зашифрованный пароль)
+  email       String?    @unique // НОВОЕ ПОЛЕ (Логин)
+  password    String?            // НОВОЕ ПОЛЕ (Зашифрованный пароль)
   fullName    String?
   phone       String?
   role        String    @default("USER") // "USER" или "ADMIN"
