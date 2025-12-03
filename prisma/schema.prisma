@@ -10,14 +10,20 @@ datasource db {
 // --- КОРИСТУВАЧІ ---
 model User {
   id          String    @id @default(uuid())
-  diiaId      String    @unique
+  email       String    @unique // НОВОЕ ПОЛЕ (Логин)
+  password    String            // НОВОЕ ПОЛЕ (Зашифрованный пароль)
   fullName    String?
-  phone       String?   @unique
+  phone       String?
+  role        String    @default("USER") // "USER" или "ADMIN"
+  
+  // Старые поля (можешь оставить или убрать diiaId, если не нужно)
+  diiaId      String?   @unique 
   trustRating Float     @default(5.0)
   
   orders      Order[]
   createdAt   DateTime  @default(now())
 }
+
 
 // --- ТОВАРИ ---
 model Product {

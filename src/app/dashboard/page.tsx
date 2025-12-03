@@ -1,125 +1,162 @@
 'use client';
 
-import Link from 'next/link'; // <--- ВОТ ЭТО БЫЛО ПРОПУЩЕНО
-import { TrendingUp, DollarSign, Clock } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { Package, Settings, LogOut, TrendingUp, Users, ShoppingBag, ArrowRight, Home, Clock } from 'lucide-react';
 
 export default function DashboardPage() {
+  const router = useRouter();
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    // 1. Перевіряємо, чи увійшов юзер
+    const storedUser = localStorage.getItem('user');
+    if (!storedUser) {
+      router.push('/login');
+      return;
+    }
+    setUser(JSON.parse(storedUser));
+  }, [router]);
+
+  if (!user) return null; 
+
+  // === ВАРІАНТ 1: ДАШБОРД АДМІНА ===
+  if (user.role === 'ADMIN') {
+    return <AdminDashboard user={user} />;
+  }
+
+  // === ВАРІАНТ 2: КАБІНЕТ ПОКУПЦЯ (Звичайний юзер) ===
+  return <UserDashboard user={user} />;
+}
+
+// --- КОМПОНЕНТ ДЛЯ ПОКУПЦЯ ---
+function UserDashboard({ user }: { user: any }) {
+  const router = useRouter();
+  
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    router.push('/login');
+  };
+
   return (
-    <div>
-      <header className="mb-8">
-        <h1 className="text-3xl font-black uppercase">Центр керування</h1>
-        <p className="text-gray-500">ID Продавця: ETNODIM-01 // Статус: Активний</p>
-      </header>
-
-      {/* STATS CARDS */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <StatCard title="Загальний дохід" value="₴48 600" icon={<DollarSign />} trend="+12%" />
-        <StatCard title="Замовлення" value="9" icon={<Box />} trend="+2" />
-        <StatCard title="Середній чек" value="₴5 400" icon={<TrendingUp />} trend="+5%" />
-        <StatCard title="Час обробки" value="0.4s" icon={<Clock />} color="text-[#00FF94]" />
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div className="max-w-5xl mx-auto">
         
-        {/* БЛОК 1: Склад товаров */}
-        <div className="bg-[#111] border border-white/5 p-6 rounded-2xl">
-          <h3 className="font-bold mb-4 uppercase text-gray-400 text-sm tracking-wider">Склад товарів</h3>
-          <div className="flex justify-between items-center">
-            <div>
-              <div className="text-2xl font-bold">14 позицій</div>
-              <div className="text-sm text-gray-500">Управління каталогом та цінами</div>
-            </div>
-            {/* Кнопка-ссылка */}
-            <Link 
-                href="/dashboard/add-product" 
-                className="bg-white text-black px-4 py-2 rounded-lg font-bold hover:bg-gray-200 transition"
-            >
-              + Додати
+        {/* Шапка */}
+        <header className="flex justify-between items-center mb-12 border-b border-white/10 pb-6">
+          <div>
+            <h1 className="text-3xl font-black uppercase tracking-wide mb-2">Мій Кабінет</h1>
+            <p className="text-white/50">Вітаємо, <span className="text-[#00FF94]">{user.fullName}</span>!</p>
+          </div>
+          {/* Кнопки виходу тут прибрали, бо вони є в бічному меню layout */}
+        </header>
+
+        {/* Сітка меню */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+            {/* Картка 1: Мої замовлення */}
+            <Link href="/dashboard/orders" className="bg-[#111] p-8 rounded-3xl border border-white/5 hover:border-[#00FF94]/50 transition group cursor-pointer">
+                <div className="flex justify-between items-start mb-6">
+                    <div className="p-4 bg-[#00FF94]/10 rounded-2xl text-[#00FF94]">
+                        <Package size={32} />
+                    </div>
+                    <ArrowRight className="text-white/20 group-hover:text-[#00FF94] transition" />
+                </div>
+                <h2 className="text-2xl font-bold mb-2">Мої Замовлення</h2>
+                <p className="text-white/40 text-sm">Історія покупок та статус доставки</p>
             </Link>
-          </div>
-        </div>
 
-        {/* БЛОК 2: AI Studio */}
-        <div className="bg-[#111] border border-white/5 p-6 rounded-2xl relative overflow-hidden group cursor-pointer">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-[#00FF94] blur-[80px] opacity-20 group-hover:opacity-30 transition"></div>
-          
-          <h3 className="font-bold mb-4 uppercase text-[#00FF94] text-sm tracking-wider">AI Content Maker</h3>
-          <div className="flex justify-between items-center relative z-10">
-            <div>
-              <div className="text-2xl font-bold">Генерація фото</div>
-              <div className="text-sm text-gray-500">Автоматична генерація контенту</div>
-            </div>
-            {/* Кнопка-ссылка на студию (пока заглушка или можно вести на add-product) */}
-           <Link href="/dashboard/studio">
-    <button className="bg-[#00FF94] text-black ...">
-        ✨ Студія
-    </button>
-</Link>
-          </div>
-        </div>
-
-      </div>
-
-      {/* ЛЕНТА ЗАКАЗОВ (Превью) */}
-      <div className="mt-8">
-        <h3 className="font-bold mb-4 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#00FF94]"></span>
-            Стрічка замовлень
-        </h3>
-        <div className="bg-[#111] border border-white/5 rounded-2xl overflow-hidden">
-            {/* Строка 1 */}
-            <div className="p-4 flex items-center justify-between border-b border-white/5 hover:bg-white/5 transition cursor-pointer">
-                <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded bg-gray-800 flex items-center justify-center">📦</div>
-                    <div>
-                        <div className="font-bold text-sm">#df591db7</div>
-                        <div className="text-xs text-gray-500">Cyber-Poshta Unit</div>
+            {/* Картка 2: Налаштування */}
+            <Link href="/dashboard/settings" className="bg-[#111] p-8 rounded-3xl border border-white/5 hover:border-[#00FF94]/50 transition group cursor-pointer">
+                <div className="flex justify-between items-start mb-6">
+                    <div className="p-4 bg-purple-500/10 rounded-2xl text-purple-500">
+                        <Settings size={32} />
                     </div>
+                    <ArrowRight className="text-white/20 group-hover:text-purple-500 transition" />
                 </div>
-                <div className="text-right">
-                    <div className="text-[#00FF94] text-sm font-bold bg-[#00FF94]/10 px-2 py-1 rounded">ОПЛАЧЕНО</div>
-                    <div className="text-[10px] text-gray-500 mt-1">Метод: Apple Pay</div>
-                </div>
-            </div>
-            {/* Строка 2 */}
-            <div className="p-4 flex items-center justify-between hover:bg-white/5 transition cursor-pointer">
-                <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded bg-gray-800 flex items-center justify-center">👟</div>
-                    <div>
-                        <div className="font-bold text-sm">#a1b2c3d4</div>
-                        <div className="text-xs text-gray-500">Nike Air Mag UA</div>
-                    </div>
-                </div>
-                <div className="text-right">
-                    <div className="text-yellow-500 text-sm font-bold bg-yellow-500/10 px-2 py-1 rounded">ОЧІКУЄ</div>
-                    <div className="text-[10px] text-gray-500 mt-1">Метод: Mono Parts</div>
-                </div>
+                <h2 className="text-2xl font-bold mb-2">Налаштування</h2>
+                <p className="text-white/40 text-sm">Зміна паролю та особистих даних</p>
+            </Link>
+        </div>
+
+        {/* Статус активного замовлення (інформативно) */}
+        <div>
+            <h3 className="text-xl font-bold mb-6">Статус</h3>
+            <div className="bg-[#111] border border-white/5 rounded-2xl p-8 text-center relative overflow-hidden">
+                 <div className="absolute top-0 right-0 w-64 h-64 bg-[#00FF94]/5 rounded-full blur-[80px] pointer-events-none"></div>
+                <ShoppingBag size={48} className="mx-auto text-white/10 mb-4 relative z-10" />
+                <p className="text-white/30 relative z-10">Активних замовлень зараз немає.</p>
+                <Link href="/" className="inline-block mt-4 text-[#00FF94] hover:underline relative z-10">Перейти до каталогу</Link>
             </div>
         </div>
-      </div>
+
     </div>
   );
 }
 
-// Компонент карточки статистики
-function StatCard({ title, value, icon, trend, color }: any) {
-    return (
-        <div className="bg-[#111] border border-white/5 p-6 rounded-2xl flex flex-col justify-between h-32 hover:border-white/10 transition">
-            <div className="flex justify-between items-start">
-                <span className="text-gray-500 text-xs font-bold uppercase tracking-wider">{title}</span>
-                <div className={`p-2 rounded-lg bg-white/5 ${color || 'text-white'}`}>{icon}</div>
+// --- КОМПОНЕНТ ДЛЯ АДМІНА (Виправлений: без дублювання меню) ---
+function AdminDashboard({ user }: { user: any }) {
+  // Ми прибрали <aside> (бічну панель) і обгортку <div class="flex">, 
+  // тому що вони вже є в файлі layout.tsx
+  return (
+    <div>
+        <header className="flex justify-between items-center mb-10">
+            <div>
+                <h1 className="text-4xl font-black uppercase tracking-wide mb-1">Центр Керування</h1>
+                <p className="text-white/40 font-mono text-sm">ID Продавця: {user.id.slice(0,8)} // Статус: Активний</p>
             </div>
-            <div className="flex items-end gap-2">
-                <span className="text-2xl font-black font-mono">{value}</span>
-                {trend && <span className="text-xs text-[#00FF94] mb-1">{trend}</span>}
+            <div className="flex gap-4">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#00FF94] to-blue-600 shadow-[0_0_15px_rgba(0,255,148,0.3)]"></div>
             </div>
+        </header>
+
+        {/* STATS GRID */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <StatCard label="Загальний дохід" value="₴48 600" sub="+12%" />
+            <StatCard label="Замовлення" value="9" sub="+2" icon={<Package size={18}/>} />
+            <StatCard label="Середній чек" value="₴5 400" sub="+5%" icon={<TrendingUp size={18}/>} />
+            <StatCard label="Час обробки" value="0.4s" icon={<Clock size={18}/>} />
         </div>
-    )
+
+        {/* AI STUDIO PROMO & ACTIONS */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+             <div className="bg-[#111] border border-white/5 p-8 rounded-3xl relative overflow-hidden">
+                <div className="relative z-10">
+                    <h3 className="text-white/40 text-xs font-bold uppercase tracking-wider mb-2">Склад товарів</h3>
+                    <div className="text-4xl font-black mb-1">14 позицій</div>
+                    <p className="text-white/40 text-sm mb-6">Управління каталогом та цінами</p>
+                    {/* Кнопка веде на склад (створимо сторінку пізніше або просто заглушка) */}
+                    <Link href="/dashboard/inventory">
+                        <button className="bg-white text-black px-6 py-3 rounded-xl font-bold hover:scale-105 transition">+ Управління складом</button>
+                    </Link>
+                </div>
+             </div>
+
+             <div className="bg-gradient-to-br from-[#111] to-[#001a0f] border border-[#00FF94]/20 p-8 rounded-3xl relative overflow-hidden group">
+                <div className="relative z-10">
+                    <h3 className="text-[#00FF94] text-xs font-bold uppercase tracking-wider mb-2">AI Content Maker</h3>
+                    <div className="text-4xl font-black mb-1 text-white">Генерація фото</div>
+                    <p className="text-white/40 text-sm mb-6">Автоматична генерація контенту</p>
+                    <Link href="/dashboard/studio">
+                        <button className="bg-[#00FF94] text-black px-6 py-3 rounded-xl font-bold hover:bg-[#00cc76] transition shadow-[0_0_20px_rgba(0,255,148,0.3)]">
+                            ✨ Студія
+                        </button>
+                    </Link>
+                </div>
+             </div>
+        </div>
+    </div>
+  );
 }
 
-// Иконка коробки
-function Box() {
+// Компонент картки статистики (щоб не дублювати код)
+function StatCard({ label, value, sub, icon }: any) {
     return (
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+        <div className="bg-[#111] p-6 rounded-3xl border border-white/5 hover:border-[#00FF94]/30 transition group">
+            <div className="flex justify-between items-start mb-4">
+                <span className="text-white/40 text-xs font-bold uppercase tracking-wider">{label}</span>
+                <div className="p-2 bg-white/5 rounded-lg text-white group-hover:text-[#00FF94] transition">{icon || '$'}</div>
+            </div>
+            <div className="text-3xl font-black font-mono">{value} {sub && <span className="text-xs text-[#00FF94] align-top">{sub}</span>}</div>
+        </div>
     )
 }

@@ -12,3 +12,18 @@ body {
   background: var(--background);
   overflow: hidden; /* Важно, чтобы не было прокрутки страницы за пределами сторис */
 }
+/* src/app/globals.css */
+
+/* Неон для білого тексту (WEAR THE) */
+.neon-white {
+  text-shadow: 
+    0 0 5px rgba(255, 255, 255, 0.8),
+    0 0 10px rgba(255, 255, 255, 0.5),
+    0 0 20px rgba(0, 255, 148, 0.5); /* Зелений відтінок */
+}
+
+/* Неон для градієнтного тексту (FUTURE) - тут потрібен drop-shadow */
+.neon-gradient {
+  filter: drop-shadow(0 0 5px rgba(0, 255, 148, 0.5)) 
+          drop-shadow(0 0 15px rgba(0, 255, 148, 0.3));
+}

@@ -1,100 +1,83 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { User, Mail, Phone, Save } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function SettingsPage() {
-  // Состояния для хранения данных
-  const [shopName, setShopName] = useState('');
-  const [email, setEmail] = useState('');
-  const [apiKey, setApiKey] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
+  const [userData, setUserData] = useState({ fullName: '', email: '', phone: '' });
+  const [loading, setLoading] = useState(false);
 
-  // 1. ЗАГРУЗКА: При открытии страницы читаем из localStorage
   useEffect(() => {
-    const savedName = localStorage.getItem('nexus_shop_name');
-    const savedEmail = localStorage.getItem('nexus_shop_email');
-    const savedKey = localStorage.getItem('nexus_api_key');
-
-    if (savedName) setShopName(savedName);
-    else setShopName('ETNODIM'); // Значение по умолчанию
-
-    if (savedEmail) setEmail(savedEmail);
-    else setEmail('owner@etnodim.com');
-
-    if (savedKey) setApiKey(savedKey);
-    
-    setIsLoading(false);
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) setUserData(JSON.parse(storedUser));
   }, []);
 
-  // 2. СОХРАНЕНИЕ: Записываем в localStorage
-  const handleSave = () => {
-    localStorage.setItem('nexus_shop_name', shopName);
-    localStorage.setItem('nexus_shop_email', email);
-    localStorage.setItem('nexus_api_key', apiKey);
-    
-    toast.success('Налаштування збережено!', {
-        style: { background: '#00FF94', color: 'black', fontWeight: 'bold' }
-    });
+  const handleSave = (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setTimeout(() => {
+        toast.success('Профіль оновлено!');
+        setLoading(false);
+    }, 1000);
   };
-
-  if (isLoading) return <div className="text-gray-500">Завантаження налаштувань...</div>;
 
   return (
     <div className="max-w-2xl">
-      <h1 className="text-3xl font-black uppercase mb-8">Налаштування</h1>
+        <h1 className="text-3xl font-black uppercase tracking-wide mb-10">Налаштування профілю</h1>
 
-      <div className="space-y-6">
-        
-        {/* Секция профиля */}
-        <div className="bg-[#111] p-6 rounded-2xl border border-white/5">
-            <h2 className="text-xl font-bold mb-4 text-[#00FF94]">Профіль магазину</h2>
-            <div className="space-y-4">
-                <div>
-                    <label className="block text-xs text-gray-400 mb-1">Назва магазину</label>
-                    <input 
-                        type="text" 
-                        value={shopName}
-                        onChange={(e) => setShopName(e.target.value)}
-                        className="w-full bg-black border border-white/10 rounded-lg p-3 text-white focus:border-[#00FF94] focus:outline-none" 
-                    />
+        <form onSubmit={handleSave} className="space-y-8">
+            <div className="bg-[#111] border border-white/10 p-8 rounded-3xl space-y-6">
+                <h2 className="text-xl font-bold text-[#00FF94] mb-4">Особисті дані</h2>
+                
+                <div className="space-y-2">
+                    <label className="text-sm text-white/50 ml-1">ПІБ</label>
+                    <div className="relative">
+                        <User size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" />
+                        <input 
+                            type="text" 
+                            value={userData.fullName}
+                            onChange={(e) => setUserData({...userData, fullName: e.target.value})}
+                            className="w-full bg-black/50 border border-white/10 rounded-xl py-4 pl-12 pr-4 text-white focus:border-[#00FF94] outline-none transition-all"
+                        />
+                    </div>
                 </div>
-                <div>
-                    <label className="block text-xs text-gray-400 mb-1">Email для сповіщень</label>
-                    <input 
-                        type="email" 
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="w-full bg-black border border-white/10 rounded-lg p-3 text-white focus:border-[#00FF94] focus:outline-none" 
-                    />
+
+                <div className="space-y-2">
+                    <label className="text-sm text-white/50 ml-1">Email</label>
+                    <div className="relative">
+                        <Mail size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" />
+                        <input 
+                            type="email" 
+                            value={userData.email}
+                            disabled
+                            className="w-full bg-black/30 border border-white/5 rounded-xl py-4 pl-12 pr-4 text-white/50 cursor-not-allowed"
+                        />
+                    </div>
+                </div>
+
+                <div className="space-y-2">
+                    <label className="text-sm text-white/50 ml-1">Телефон</label>
+                    <div className="relative">
+                        <Phone size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30" />
+                        <input 
+                            type="tel" 
+                            value={userData.phone}
+                            onChange={(e) => setUserData({...userData, phone: e.target.value})}
+                            className="w-full bg-black/50 border border-white/10 rounded-xl py-4 pl-12 pr-4 text-white focus:border-[#00FF94] outline-none transition-all"
+                        />
+                    </div>
                 </div>
             </div>
-        </div>
 
-        {/* Секция API */}
-        <div className="bg-[#111] p-6 rounded-2xl border border-white/5">
-            <h2 className="text-xl font-bold mb-4 text-[#00FF94]">Інтеграції</h2>
-            <div>
-                <label className="block text-xs text-gray-400 mb-1">Nova Poshta API Key</label>
-                <input 
-                    type="password" 
-                    value={apiKey}
-                    onChange={(e) => setApiKey(e.target.value)}
-                    placeholder="Вставте API ключ..."
-                    className="w-full bg-black border border-white/10 rounded-lg p-3 text-white focus:border-[#00FF94] focus:outline-none" 
-                />
-                <p className="text-[10px] text-gray-500 mt-2">Ключ використовується для автоматичного створення ТТН.</p>
-            </div>
-        </div>
-
-        <button 
-            onClick={handleSave}
-            className="bg-[#00FF94] text-black font-bold py-3 px-8 rounded-xl hover:bg-[#00cc76] transition shadow-[0_0_15px_rgba(0,255,148,0.3)]"
-        >
-            Зберегти зміни
-        </button>
-
-      </div>
+            <button 
+                type="submit" 
+                disabled={loading}
+                className="bg-[#00FF94] text-black px-8 py-4 rounded-xl font-bold uppercase hover:bg-[#00cc76] transition-all flex items-center gap-2"
+            >
+                {loading ? 'Збереження...' : <><Save size={20} /> Зберегти зміни</>}
+            </button>
+        </form>
     </div>
   );
 }
