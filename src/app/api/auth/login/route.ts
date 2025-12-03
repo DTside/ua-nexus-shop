@@ -15,7 +15,9 @@ export async function POST(req: Request) {
     if (!user) {
       return NextResponse.json({ error: 'Користувача не знайдено' }, { status: 400 });
     }
-
+if (!user.password) {
+  return NextResponse.json({ error: 'Увійдіть через Дію (пароль не встановлено)' }, { status: 400 });
+}
     // 2. Перевіряємо пароль (порівнюємо введений з хешем у базі)
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
